@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b100d">
+  <meta name="description" content="TANK BATTLE 坦克大战：一款无需安装、打开即玩的复古街机坦克游戏。守住指挥鹰，击退五波敌军。">
+  <title>TANK BATTLE · 坦克大战</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="backdrop" aria-hidden="true">
+    <div class="backdrop-grid"></div>
+    <div class="backdrop-glow backdrop-glow--one"></div>
+    <div class="backdrop-glow backdrop-glow--two"></div>
+  </div>
+
+  <main class="shell">
+    <header class="masthead">
+      <div class="brand-block">
+        <div class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <div>
+          <p class="eyebrow">IRON FRONT // ARCADE DIVISION</p>
+          <h1>TANK <span>BATTLE</span></h1>
+          <p class="brand-cn">坦克大战 · 钢铁防线</p>
+        </div>
+      </div>
+      <div class="masthead-meta">
+        <span class="status-dot"></span>
+        <span>FIELD UNIT 08</span>
+        <span class="meta-divider">/</span>
+        <span>1985 PROTOCOL</span>
+      </div>
+    </header>
+
+    <div class="game-layout">
+      <section class="game-column" aria-label="坦克大战游戏区域">
+        <div class="hud" aria-label="游戏状态">
+          <div class="hud-cell">
+            <span class="hud-label">SCORE</span>
+            <strong id="score">000000</strong>
+          </div>
+          <div class="hud-cell hud-cell--center">
+            <span class="hud-label">SECTOR</span>
+            <strong><span id="wave">01</span><small>/05</small></strong>
+          </div>
+          <div class="hud-cell hud-cell--center">
+            <span class="hud-label">HOSTILES</span>
+            <strong id="enemies">06</strong>
+          </div>
+          <div class="hud-cell hud-cell--right">
+            <span class="hud-label">ARMOR</span>
+            <strong class="lives-value"><span class="life-tank" aria-hidden="true"></span><span id="lives">3</span></strong>
+          </div>
+        </div>
+
+        <div class="screen-frame">
+          <div class="frame-screw frame-screw--tl" aria-hidden="true"></div>
+          <div class="frame-screw frame-screw--tr" aria-hidden="true"></div>
+          <div class="frame-screw frame-screw--bl" aria-hidden="true"></div>
+          <div class="frame-screw frame-screw--br" aria-hidden="true"></div>
+
+          <div class="screen-wrap" id="screenWrap">
+            <canvas id="game" width="624" height="624" tabindex="0" aria-label="坦克大战游戏画面" role="application"></canvas>
+            <div class="scanlines" aria-hidden="true"></div>
+            <div class="screen-vignette" aria-hidden="true"></div>
+
+            <div class="announce" id="announce" aria-live="polite">
+              <span id="announceKicker">WAVE 02</span>
+              <strong id="announceText">ENEMY ARMOR INBOUND</strong>
+            </div>
+
+            <div class="pause-stamp" id="pauseStamp" hidden>PAUSED<span>按 P 继续</span></div>
+
+            <div class="overlay" id="overlay">
+              <p class="overlay-kicker" id="overlayKicker">1985 ARCADE // WEB DIVISION</p>
+              <h2 id="overlayTitle">TANK<br><span>BATTLE</span></h2>
+              <p class="overlay-cn" id="overlayText">坦克大战 · 守住最后的指挥鹰</p>
+              <button class="primary-btn" id="startBtn" type="button">
+                <span id="startBtnText">进入战场</span>
+                <span class="btn-arrow" aria-hidden="true">→</span>
+              </button>
+              <p class="overlay-hint" id="overlayHint">WASD / 方向键移动 · SPACE 开火</p>
+            </div>
+          </div>
+
+          <div class="control-bar">
+            <div class="control-hints">
+              <span><kbd>WASD</kbd> / <kbd>↑↓←→</kbd> 移动</span>
+              <span><kbd>SPACE</kbd> 开火</span>
+              <span><kbd>P</kbd> 暂停</span>
+            </div>
+            <div class="control-actions">
+              <button class="utility-btn" id="muteBtn" type="button" aria-pressed="false">SOUND ON</button>
+              <button class="utility-btn" id="pauseBtn" type="button">PAUSE</button>
+              <button class="utility-btn utility-btn--danger" id="restartBtn" type="button">RESTART</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="buff-strip" id="buffStrip" aria-live="polite">
+          <span class="buff-strip__label">SYSTEMS</span>
+          <div class="buff-list" id="buffList"></div>
+          <span class="buff-empty" id="buffEmpty">ALL SYSTEMS NOMINAL</span>
+        </div>
+
+        <div class="touch-controls" aria-label="触屏操作">
+          <div class="dpad">
+            <button class="dpad-btn dpad-up" type="button" data-dir="0" aria-label="向上移动">▲</button>
+            <button class="dpad-btn dpad-left" type="button" data-dir="3" aria-label="向左移动">◀</button>
+            <div class="dpad-center" aria-hidden="true"></div>
+            <button class="dpad-btn dpad-right" type="button" data-dir="1" aria-label="向右移动">▶</button>
+            <button class="dpad-btn dpad-down" type="button" data-dir="2" aria-label="向下移动">▼</button>
+          </div>
+          <button class="fire-btn" id="fireBtn" type="button" aria-label="发射炮弹">
+            <span>FIRE</span>
+            <small>开火</small>
+          </button>
+        </div>
+      </section>
+
+      <aside class="briefing" aria-label="任务简报和操作说明">
+        <section class="briefing-card briefing-card--mission">
+          <div class="panel-heading">
+            <span class="panel-index">01</span>
+            <h2>MISSION</h2>
+            <span class="panel-status">ACTIVE</span>
+          </div>
+          <p class="mission-title">守住南侧指挥鹰</p>
+          <p class="mission-copy">敌军装甲纵队正从北线推进。击退全部五波进攻，不要让指挥鹰被摧毁。</p>
+          <div class="objective">
+            <span class="objective-key">PRIMARY</span>
+            <span class="objective-value">DEFEND THE EAGLE</span>
+          </div>
+          <div class="objective">
+            <span class="objective-key">SECTORS</span>
+            <span class="objective-value">05</span>
+          </div>
+        </section>
+
+        <section class="briefing-card">
+          <div class="panel-heading">
+            <span class="panel-index">02</span>
+            <h2>HOSTILES</h2>
+          </div>
+          <ul class="enemy-list">
+            <li>
+              <span class="enemy-swatch enemy-swatch--grunt"></span>
+              <span><b>RIFLEMAN</b><small>标准装甲 · 100 pts</small></span>
+            </li>
+            <li>
+              <span class="enemy-swatch enemy-swatch--scout"></span>
+              <span><b>OUTRIDER</b><small>高速单位 · 150 pts</small></span>
+            </li>
+            <li>
+              <span class="enemy-swatch enemy-swatch--gunner"></span>
+              <span><b>GUNNER</b><small>高频火力 · 200 pts</small></span>
+            </li>
+            <li>
+              <span class="enemy-swatch enemy-swatch--armor"></span>
+              <span><b>JUGGERNAUT</b><small>三层装甲 · 350 pts</small></span>
+            </li>
+          </ul>
+        </section>
+
+        <section class="briefing-card">
+          <div class="panel-heading">
+            <span class="panel-index">03</span>
+            <h2>FIELD MANUAL</h2>
+          </div>
+          <div class="manual-row">
+            <kbd>W A S D</kbd>
+            <span>四向移动</span>
+          </div>
+          <div class="manual-row">
+            <kbd>SPACE</kbd>
+            <span>发射炮弹</span>
+          </div>
+          <div class="manual-row">
+            <kbd>P</kbd>
+            <span>暂停 / 继续</span>
+          </div>
+          <div class="manual-row">
+            <kbd>R</kbd>
+            <span>重新部署</span>
+          </div>
+          <p class="manual-note">拾取战场补给：护盾、极速火力、增援装甲与全域爆破。</p>
+        </section>
+
+        <div class="best-strip">
+          <span>PERSONAL BEST</span>
+          <strong id="highScore">000000</strong>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="footer">
+      <span>© 2026 IRON FRONT</span>
+      <span class="footer-sep">///</span>
+      <span>NO INSTALL · NO MERCY</span>
+      <span class="footer-spacer"></span>
+      <span>BUILT FOR THE BROWSER</span>
+    </footer>
+  </main>
+
+  <script src="js/game.js"></script>
+</body>
+</html>
